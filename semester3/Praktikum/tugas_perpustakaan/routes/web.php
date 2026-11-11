@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
@@ -87,18 +88,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/riwayat-saya', [PeminjamanController::class, 'riwayatSaya'])->name('peminjaman.riwayat_saya');
 
     // ==========================================
-    // SIMULASI SOAL 1: CELAH A2 (SQL INJECTION)
+    // RUTE HASIL PENAMBALAN (SOAL 2 & SOAL 3)
     // ==========================================
+    
+    // Penambalan A2 (SQLi): Menggunakan Parameter Binding ?
     Route::get('/buku-cari', function (\Illuminate\Http\Request $request) {
-    $judul = $request->query('judul');
-    $bukus = DB::select("SELECT * FROM bukus WHERE judul = ?", [$judul]);
-    return response()->json($bukus);
+        $judul = $request->query('judul');
+        $bukus = DB::select("SELECT * FROM bukus WHERE judul = ?", [$judul]);
+        return response()->json($bukus);
     });
 
-    // Celah A3: Hapus Buku via GET (Rentan CSRF)
-    // Route::get('/buku/{id}/hapus', [BukuController::class, 'destroy'])->name('buku.hapus.vulnerable');
-
-    // Celah A4: Detail Peminjaman Tanpa Cek Pemilik (IDOR)
+    // Penambalan A4 (IDOR): Rute detail peminjaman yang kini dilindungi Gate di Controller
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
 
+    // Catatan: Rute GET /buku/{id}/hapus (A3) telah dihapus untuk menghentikan celah CSRF.
 });
