@@ -90,13 +90,13 @@ Route::middleware(['auth'])->group(function () {
     // SIMULASI SOAL 1: CELAH A2 (SQL INJECTION)
     // ==========================================
     Route::get('/buku-cari', function (\Illuminate\Http\Request $request) {
-        $judul = $request->query('judul');
-        $bukus = DB::select("SELECT * FROM bukus WHERE judul = '$judul'");
-        return response()->json($bukus);
+    $judul = $request->query('judul');
+    $bukus = DB::select("SELECT * FROM bukus WHERE judul = ?", [$judul]);
+    return response()->json($bukus);
     });
 
     // Celah A3: Hapus Buku via GET (Rentan CSRF)
-    Route::get('/buku/{id}/hapus', [BukuController::class, 'destroy'])->name('buku.hapus.vulnerable');
+    // Route::get('/buku/{id}/hapus', [BukuController::class, 'destroy'])->name('buku.hapus.vulnerable');
 
     // Celah A4: Detail Peminjaman Tanpa Cek Pemilik (IDOR)
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');

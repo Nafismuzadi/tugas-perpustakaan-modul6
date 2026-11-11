@@ -49,8 +49,9 @@
                                         {{ $item->kategori->nama_kategori ?? $item->kategori->nama ?? $item->kategori ?? '-' }}
                                     </span>
                                 </td>
+                                <td class="py-3 px-4 font-medium text-gray-900">{{  $item->judul  }}</td>
                                 {{-- bagian sini diubah --}}
-                                <td class="py-3 px-4 font-medium text-gray-900">{!! $item->judul !!}</td>
+                                {{-- <td class="py-3 px-4 font-medium text-gray-900">{!! $item->judul !!}</td> --}}
                                 <td class="py-3 px-4">{{ $item->penulis }}</td>
                                 <td class="py-3 px-4">{{ $item->tahun_terbit }}</td>
                                 <td class="py-3 px-4 text-center">
