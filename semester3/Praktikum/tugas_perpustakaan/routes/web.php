@@ -96,7 +96,7 @@ Route::middleware(['auth'])->group(function () {
         $judul = $request->query('judul');
         $bukus = DB::select("SELECT * FROM bukus WHERE judul = ?", [$judul]);
         return response()->json($bukus);
-    });
+    })->middleware('throttle:5,1');
 
     // Penambalan A4 (IDOR): Rute detail peminjaman yang kini dilindungi Gate di Controller
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
