@@ -5,98 +5,76 @@ namespace App\Http\Controllers;
 use App\Models\Buku;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class BukuController extends Controller
 {
-    /**
-     * Menampilkan daftar semua buku (Blade View).
-     */
     public function index()
     {
-        $buku = Buku::with('kategori')->latest()->get();
-
-        return view('buku.index', compact('buku'));
+        $bukus = Buku::with('kategori')->latest()->get();
+        return view('buku.index', compact('bukus'));
     }
 
-    /**
-     * Menampilkan form untuk menambah buku baru (Blade View).
-     */
     public function create()
     {
         $kategori = Kategori::all();
-
         return view('buku.create', compact('kategori'));
     }
 
-    /**
-     * Menyimpan data buku baru ke database.
-     */
+    // Soal 4: Validasi Input Ketat pada Penambahan Buku
     public function store(Request $request)
     {
-        $request->validate([
-            'judul'        => 'required|string|max:255',
-            'penulis'      => 'required|string|max:255',
-            'tahun_terbit' => 'required|numeric',
-            'kategori_id'  => ['required', Rule::exists(Kategori::class, 'id')],
+        $validatedData = $request->validate([
+            'judul'        => ['required', 'string', 'max:255'],
+            'penulis'      => ['required', 'string', 'max:100'],
+            'kategori_id'  => ['required', 'exists:kategoris,id'],
+            'stok'         => ['required', 'integer', 'min:0'],
+        ], [
+            'judul.required'       => 'Judul buku wajib diisi.',
+            'kategori_id.exists'   => 'Kategori yang dipilih tidak valid.',
+            'stok.integer'         => 'Stok harus berupa angka.',
         ]);
 
-        Buku::create($request->all());
+        // Menyimpan hanya data yang sudah terverifikasi (Mencegah Mass Assignment)
+        Buku::create($validatedData);
 
-        return redirect()->route('buku.index')
-            ->with('success', 'Buku baru berhasil ditambahkan!');
+        return redirect()->route('buku.index')->with('success', 'Buku berhasil ditambahkan.');
     }
 
-    /**
-     * Menampilkan detail informasi buku (Blade View).
-     */
     public function show($id)
     {
         $buku = Buku::with('kategori')->findOrFail($id);
-
         return view('buku.show', compact('buku'));
     }
 
-    /**
-     * Menampilkan form untuk mengedit data buku (Blade View).
-     */
     public function edit($id)
     {
         $buku = Buku::findOrFail($id);
         $kategori = Kategori::all();
-
         return view('buku.edit', compact('buku', 'kategori'));
     }
 
-    /**
-     * Memperbarui data buku di database.
-     */
+    // Soal 4: Validasi Input Ketat pada Perubahan Buku
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'judul'        => 'required|string|max:255',
-            'penulis'      => 'required|string|max:255',
-            'tahun_terbit' => 'required|numeric',
-            'kategori_id'  => ['required', Rule::exists(Kategori::class, 'id')],
+        $buku = Buku::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'judul'        => ['required', 'string', 'max:255'],
+            'penulis'      => ['required', 'string', 'max:100'],
+            'kategori_id'  => ['required', 'exists:kategoris,id'],
+            'stok'         => ['required', 'integer', 'min:0'],
         ]);
 
-        $buku = Buku::findOrFail($id);
-        $buku->update($request->all());
+        $buku->update($validatedData);
 
-        return redirect()->route('buku.index')
-            ->with('success', 'Data buku "' . $buku->judul . '" berhasil diperbarui!');
+        return redirect()->route('buku.index')->with('success', 'Data buku berhasil diperbarui.');
     }
 
-    /**
-     * Menghapus data buku dari database.
-     */
     public function destroy($id)
     {
         $buku = Buku::findOrFail($id);
-        $namaJudul = $buku->judul;
         $buku->delete();
 
-        return redirect()->route('buku.index')
-            ->with('success', 'Buku "' . $namaJudul . '" berhasil dihapus!');
+        return redirect()->route('buku.index')->with('success', 'Buku berhasil dihapus.');
     }
 }
